@@ -6,21 +6,27 @@ import (
 	"fmt"
 )
 
-// provides all the function to execute db queries and transactions
-type Store struct {
+// Store provides all the function to execute db queries and transactions
+type Store interface {
+	Querier
+	TransferTxn(ctx context.Context, args TransferTxnParam) (TransferTxnResult, error)
+}
+
+// SQLStore provides all the function to execute SQL queries and transactions
+type SQLStore struct {
 	db *sql.DB
 	*Queries
 }
 
 // creates a new store
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
 }
 
-func (store *Store) execTxn(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTxn(ctx context.Context, fn func(*Queries) error) error {
 	txn, err := store.db.BeginTx(ctx, nil)
 
 	if err != nil {
@@ -64,7 +70,7 @@ func getTransferParam(args TransferTxnParam) *CreateTransferParams {
 
 // TransferTxn performs the transfer of amount between two accounts
 // It creates the transfer record, add account entries, and update the accounts' balance in a single transaction
-func (store *Store) TransferTxn(ctx context.Context, args TransferTxnParam) (TransferTxnResult, error) {
+func (store *SQLStore) TransferTxn(ctx context.Context, args TransferTxnParam) (TransferTxnResult, error) {
 	var result TransferTxnResult
 
 	err := store.execTxn(ctx, func(q *Queries) error {
