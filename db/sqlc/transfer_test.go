@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"simple-bank/utils"
 	"testing"
 
@@ -22,20 +21,9 @@ func createRandomTestTransfer(fromAccount, toAccount, amount int64) (Transfer, e
 	return transfer, err
 }
 
-func deleteTestTransfer(id int64) {
-	err := testQueries.DeleteAccount(context.Background(), id)
-
-	if err != nil {
-		fmt.Println("could not delete transfer ", err)
-		return
-	}
-
-	fmt.Println("Deleted the transfer record for ", id)
-}
-
 func TestCreateTransfer(t *testing.T) {
-	fromAccount := CreateRandomTestAccount(t)
-	toAccount := CreateRandomTestAccount(t)
+	fromAccount := createRandomTestAccount(t)
+	toAccount := createRandomTestAccount(t)
 	amount := utils.RandomMoney()
 
 	transfer, err := createRandomTestTransfer(fromAccount.ID, toAccount.ID, amount)
@@ -44,15 +32,11 @@ func TestCreateTransfer(t *testing.T) {
 	require.Equal(t, fromAccount.ID, transfer.FromAccountID)
 	require.Equal(t, toAccount.ID, transfer.ToAccountID)
 	require.Equal(t, amount, transfer.Amount)
-
-	deleteTestTransfer(transfer.ID)
-	DeleteTestAccount(fromAccount.ID)
-	DeleteTestAccount(toAccount.ID)
 }
 
 func TestGetTransfer(t *testing.T) {
-	fromAccount := CreateRandomTestAccount(t)
-	toAccount := CreateRandomTestAccount(t)
+	fromAccount := createRandomTestAccount(t)
+	toAccount := createRandomTestAccount(t)
 	amount := utils.RandomMoney()
 
 	createTransfer, err := createRandomTestTransfer(fromAccount.ID, toAccount.ID, amount)
@@ -64,15 +48,11 @@ func TestGetTransfer(t *testing.T) {
 	require.Equal(t, fromAccount.ID, transfer.FromAccountID)
 	require.Equal(t, toAccount.ID, transfer.ToAccountID)
 	require.Equal(t, amount, transfer.Amount)
-
-	deleteTestTransfer(transfer.ID)
-	DeleteTestAccount(fromAccount.ID)
-	DeleteTestAccount(toAccount.ID)
 }
 
 func TestGetTransfers(t *testing.T) {
-	fromAccount := CreateRandomTestAccount(t)
-	toAccount := CreateRandomTestAccount(t)
+	fromAccount := createRandomTestAccount(t)
+	toAccount := createRandomTestAccount(t)
 
 	var transferList []Transfer
 
@@ -101,10 +81,4 @@ func TestGetTransfers(t *testing.T) {
 		require.Equal(t, toAccount.ID, transfer.ToAccountID)
 	}
 
-	for _, transfer := range transferList {
-		deleteTestTransfer(transfer.ID)
-	}
-
-	DeleteTestAccount(fromAccount.ID)
-	DeleteTestAccount(toAccount.ID)
 }

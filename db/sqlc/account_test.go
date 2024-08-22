@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"simple-bank/utils"
 	"testing"
 	"time"
@@ -11,9 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func CreateRandomTestAccount(t *testing.T) Account {
+func createRandomTestAccount(t *testing.T) Account {
+	user := createRandomTestUser(t)
 	args := CreateAccountParams{
-		Owner:    utils.RandomOwner(),
+		Owner:    user.Username,
 		Balance:  utils.RandomMoney(),
 		Currency: utils.RandomCurrency(),
 	}
@@ -32,24 +32,12 @@ func CreateRandomTestAccount(t *testing.T) Account {
 	return account
 }
 
-func DeleteTestAccount(id int64) {
-	err := testQueries.DeleteAccount(context.Background(), id)
-
-	if err != nil {
-		fmt.Println("could not delete account ", err)
-		return
-	}
-
-	fmt.Println("Deleted the account record for ", id)
-}
-
 func TestCreateAccount(t *testing.T) {
-	account := CreateRandomTestAccount(t)
-	DeleteTestAccount(account.ID)
+	createRandomTestAccount(t)
 }
 
 func TestGetAccount(t *testing.T) {
-	account1 := CreateRandomTestAccount(t)
+	account1 := createRandomTestAccount(t)
 	account2, err := testQueries.GetAccount(context.Background(), account1.ID)
 
 	require.NoError(t, err)
@@ -60,13 +48,10 @@ func TestGetAccount(t *testing.T) {
 	require.Equal(t, account1.Balance, account2.Balance)
 	require.Equal(t, account1.Currency, account2.Currency)
 	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
-
-	DeleteTestAccount(account1.ID)
-
 }
 
 func TestUpdateAccount(t *testing.T) {
-	account1 := CreateRandomTestAccount(t)
+	account1 := createRandomTestAccount(t)
 
 	args := UpdateAccountParams{
 		ID:      account1.ID,
@@ -81,13 +66,10 @@ func TestUpdateAccount(t *testing.T) {
 	require.Equal(t, args.Balance, account2.Balance)
 	require.Equal(t, account1.Currency, account2.Currency)
 	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
-
-	DeleteTestAccount(account1.ID)
-
 }
 
 func TestDeleteAccount(t *testing.T) {
-	account1 := CreateRandomTestAccount(t)
+	account1 := createRandomTestAccount(t)
 
 	err := testQueries.DeleteAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
@@ -101,7 +83,7 @@ func TestDeleteAccount(t *testing.T) {
 func TestListAccount(t *testing.T) {
 	var accList []Account
 	for i := 1; i <= 10; i++ {
-		accList = append(accList, CreateRandomTestAccount(t))
+		accList = append(accList, createRandomTestAccount(t))
 	}
 
 	args := ListAccountParams{
@@ -116,9 +98,5 @@ func TestListAccount(t *testing.T) {
 
 	for _, acc := range accounts {
 		require.NotEmpty(t, acc)
-	}
-
-	for _, acc := range accList {
-		DeleteTestAccount(acc.ID)
 	}
 }

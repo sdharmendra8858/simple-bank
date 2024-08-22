@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"simple-bank/utils"
 	"testing"
 	"time"
@@ -27,26 +26,13 @@ func CreateRandomTestEntry(t *testing.T, accountId int64) Entry {
 	return entry
 }
 
-func DeleteRandomTestEntry(id int64) {
-	err := testQueries.DeleteAccount(context.Background(), id)
-
-	if err != nil {
-		fmt.Println("could not delete entry ", err)
-		return
-	}
-
-	fmt.Println("Deleted the entry record for ", id)
-}
-
 func TestCreateEntry(t *testing.T) {
-	account := CreateRandomTestAccount(t)
-	entry := CreateRandomTestEntry(t, account.ID)
-	DeleteRandomTestEntry(entry.ID)
-	DeleteTestAccount(account.ID)
+	account := createRandomTestAccount(t)
+	CreateRandomTestEntry(t, account.ID)
 }
 
 func TestGetEntry(t *testing.T) {
-	account := CreateRandomTestAccount(t)
+	account := createRandomTestAccount(t)
 	entry1 := CreateRandomTestEntry(t, account.ID)
 
 	entry2, err := testQueries.GetEntry(context.Background(), entry1.ID)
@@ -57,13 +43,10 @@ func TestGetEntry(t *testing.T) {
 	require.Equal(t, entry1.AccountID, entry2.AccountID)
 	require.Equal(t, entry1.Amount, entry2.Amount)
 	require.WithinDuration(t, entry1.CreatedAt, entry2.CreatedAt, time.Second)
-
-	DeleteRandomTestEntry(entry1.ID)
-	DeleteTestAccount(account.ID)
 }
 
 func TestGetEntries(t *testing.T) {
-	account := CreateRandomTestAccount(t)
+	account := createRandomTestAccount(t)
 	var entriesList []Entry
 	for i := 0; i < 10; i++ {
 		entriesList = append(entriesList, CreateRandomTestEntry(t, account.ID))
@@ -82,10 +65,4 @@ func TestGetEntries(t *testing.T) {
 	for _, entry := range entries {
 		require.NotEmpty(t, entry)
 	}
-
-	for _, entries := range entriesList {
-		DeleteRandomTestEntry(entries.ID)
-	}
-
-	DeleteTestAccount(account.ID)
 }

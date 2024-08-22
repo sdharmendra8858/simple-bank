@@ -11,8 +11,8 @@ import (
 func TestTransferTxn(t *testing.T) {
 	store := NewStore(testDB)
 
-	account1 := CreateRandomTestAccount(t)
-	account2 := CreateRandomTestAccount(t)
+	account1 := createRandomTestAccount(t)
+	account2 := createRandomTestAccount(t)
 	fmt.Println(">> before:", account1.Balance, account2.Balance)
 
 	// run n concurrent transfer transactions
@@ -114,8 +114,8 @@ func TestTransferTxn(t *testing.T) {
 func TestTransferTxnDeadlock(t *testing.T) {
 	store := NewStore(testDB)
 
-	account1 := CreateRandomTestAccount(t)
-	account2 := CreateRandomTestAccount(t)
+	account1 := createRandomTestAccount(t)
+	account2 := createRandomTestAccount(t)
 	fmt.Println(">> before:", account1.Balance, account2.Balance)
 
 	// run n concurrent transfer transactions
