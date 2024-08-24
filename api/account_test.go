@@ -336,7 +336,7 @@ func randomAccount() db.Account {
 		Owner:     utils.RandomOwner(),
 		Balance:   utils.RandomMoney(),
 		Currency:  utils.RandomCurrency(),
-		CreatedAt: time.Now().Truncate(time.Second),
+		CreatedAt: time.Now().UTC(),
 	}
 }
 
