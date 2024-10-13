@@ -2,6 +2,8 @@ package api
 
 import (
 	db "simple-bank/db/sqlc"
+	"simple-bank/token"
+	"simple-bank/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -9,29 +11,29 @@ import (
 )
 
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	config     utils.Config
+	tokenMaker token.Maker
+	store      db.Store
+	router     *gin.Engine
 }
 
-func NewServer(store db.Store) *Server {
-	server := &Server{
-		store: store,
+func NewServer(config utils.Config, store db.Store) (*Server, error) {
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, err
 	}
-	router := gin.Default()
+	server := &Server{
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
+	}
+
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("currency", validCurrency)
 	}
 
-	router.POST("/users", server.CreateUser)
-
-	router.POST("/accounts", server.CreateAccount)
-	router.GET("/accounts/:id", server.GetAccount)
-	router.GET("/accounts", server.ListAccounts)
-
-	router.POST("/transfer", server.CreateTransfer)
-	server.router = router
-
-	return server
+	server.setupServerRoutes()
+	return server, nil
 }
 
 func (Server *Server) Start(address string) error {
@@ -40,4 +42,17 @@ func (Server *Server) Start(address string) error {
 
 func errorHandler(err error) gin.H {
 	return gin.H{"error": err.Error()}
+}
+
+func (Server *Server) setupServerRoutes() {
+	router := gin.Default()
+	router.POST("/users", Server.CreateUser)
+	router.POST("/users/login", Server.LoginUser)
+
+	router.POST("/accounts", Server.CreateAccount)
+	router.GET("/accounts/:id", Server.GetAccount)
+	router.GET("/accounts", Server.ListAccounts)
+
+	router.POST("/transfer", Server.CreateTransfer)
+	Server.router = router
 }
