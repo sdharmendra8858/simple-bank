@@ -45,8 +45,15 @@ jobs:
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest .
           docker push $REGISTRY/$REPOSITORY
 
-      - name: Update Kube Config
-        run: aws eks update-kubeconfig --name simple-bank --region ap-south-1
+      # - name: Update Kube Config
+      #   run: aws eks update-kubeconfig --name simple-bank --region ap-south-1
+      #   env:
+      #     KUBECONFIG: $HOME/.kube/config
+
+      - name: Configure kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region ap-south-1 --name simple-bank
+          cat $KUBECONFIG
         env:
           KUBECONFIG: $HOME/.kube/config
 
