@@ -42,25 +42,11 @@ jobs:
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest .
           docker push $REGISTRY/$REPOSITORY
 
-      - name: Update Kube Config
-        run: |
-          aws eks update-kubeconfig --name simple-bank --region ap-south-1
-          # Export the KUBECONFIG variable
-          echo "KUBECONFIG=/home/runner/.kube/config" >> $GITHUB_ENV
-
-      - name: Check Kubeconfig
-        run: cat $HOME/.kube/config
-
-      - name: Set Kube Context
-        run: |
-          kubectl config use-context arn:aws:eks:ap-south-1:${{ secrets.AWS_ACCOUNT_ID }}:cluster/simple-bank
-
       - name: Deploy image to eks cluster
-        env:
-          KUBECONFIG: ${{ env.KUBECONFIG }}
         run: |
-          kubectl apply -f eks/aws-auth.yaml --validate=false
-          kubectl apply -f eks/deployment.yaml --validate=false
-          kubectl apply -f eks/service.yaml --validate=false
-          kubectl apply -f eks/issuer.yaml --validate=false
-          kubectl apply -f eks/ingress.yaml --validate=false
+          echo $AWS_PROFILE
+          kubectl apply -f eks/aws-auth.yaml
+          kubectl apply -f eks/deployment.yaml
+          kubectl apply -f eks/service.yaml
+          kubectl apply -f eks/issuer.yaml
+          kubectl apply -f eks/ingress.yaml
