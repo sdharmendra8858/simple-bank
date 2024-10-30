@@ -48,6 +48,13 @@ jobs:
           # Export the KUBECONFIG variable
           echo "KUBECONFIG=/home/runner/.kube/config" >> $GITHUB_ENV
 
+      - name: Check Kubeconfig
+        run: cat $HOME/.kube/config
+
+      - name: Set Kube Context
+        run: |
+          kubectl config use-context arn:aws:eks:ap-south-1:${{ secrets.AWS_ACCOUNT_ID }}:cluster/simple-bank
+
       - name: Deploy image to eks cluster
         env:
           KUBECONFIG: ${{ env.KUBECONFIG }}
