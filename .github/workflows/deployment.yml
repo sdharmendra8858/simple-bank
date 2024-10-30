@@ -52,15 +52,16 @@ jobs:
 
       - name: Configure kubeconfig for EKS
         run: |
+          mkdir -p ~/.kube
           aws eks update-kubeconfig --region ap-south-1 --name simple-bank
-          cat $KUBECONFIG
-        env:
-          KUBECONFIG: $HOME/.kube/config
+          export KUBECONFIG=/home/runner/.kube/config
 
       - name: Validate kubectl Access
         run: |
           kubectl config view
           kubectl get nodes
+        env:
+          KUBECONFIG: /home/runner/.kube/config
 
       - name: Deploye image to eks cluster
         run: |
