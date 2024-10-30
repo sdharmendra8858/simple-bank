@@ -47,16 +47,17 @@ jobs:
 
       - name: Update Kube Config
         run: aws eks update-kubeconfig --name simple-bank --region ap-south-1
+        env:
+          KUBECONFIG: $HOME/.kube/config
 
-      - name: debug step
+      - name: Validate kubectl Access
         run: |
-          aws sts get-caller-identity
-          kubectl config get-contexts
+          kubectl config view
+          kubectl get nodes
 
       - name: Deploye image to eks cluster
         run: |
-          kubectl apply -f eks/aws-auth.yaml --validate=false
-          kubectl config get-contexts
+          kubectl apply -f eks/aws-auth.yaml --v=8
           kubectl apply -f eks/deployment.yaml
           kubectl apply -f eks/service.yaml
           kubectl apply -f eks/issuer.yaml
