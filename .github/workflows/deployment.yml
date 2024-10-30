@@ -19,7 +19,7 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
         with:
-          version: "v1.31.0"
+          version: "v1.31.1"
         id: install
 
       - name: Configure AWS credentials
@@ -47,6 +47,10 @@ jobs:
 
       - name: Update Kube Config
         run: aws eks update-kubeconfig --name simple-bank --region ap-south-1
+
+      - name: debug step
+        run: |
+          aws sts get-caller-identity
 
       - name: Deploye image to eks cluster
         run: |
