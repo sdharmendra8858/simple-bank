@@ -24,6 +24,12 @@ migratedown1:
 sqlc:
 	sqlc generate
 
+db_docs:
+	dbdocs build docs/db.dbml
+
+db_schema:
+	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
+
 test:
 	go test -v -cover ./...
 
@@ -33,4 +39,4 @@ server:
 mock:
 	mockgen -package mockdb -destination ./db/mock/store.go simple-bank/db/sqlc Store
 
-.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 sqlc test server mock
+.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 sqlc db_docs db_schema test server mock
